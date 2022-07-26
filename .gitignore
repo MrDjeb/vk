@@ -1,0 +1,11 @@
+/assets
+
+.bin
+
+.exe
+
+.env
+
+.vscode
+
+*.db

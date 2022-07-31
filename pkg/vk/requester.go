@@ -22,9 +22,10 @@ type ResponseURL struct {
 	Hash        string `json:"hash"`
 	MessageCode int    `json:"message_code"`
 	ProfileAid  int    `json:"profile_aid"`
+	PhotoList   string `json:"photos_list"`
 }
 
-func PostUpload(urlPath, photoPath string) (*ResponseURL, error) {
+func PostUpload(urlPath, photoPath, field string) (*ResponseURL, error) {
 	client := &http.Client{
 		Timeout: time.Second * 10,
 	}
@@ -32,7 +33,7 @@ func PostUpload(urlPath, photoPath string) (*ResponseURL, error) {
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 
-	fw, err := writer.CreateFormFile("photo", photoPath)
+	fw, err := writer.CreateFormFile(field, photoPath)
 	if err != nil {
 		return nil, err
 	}
@@ -73,8 +74,46 @@ func PostUpload(urlPath, photoPath string) (*ResponseURL, error) {
 	return data, nil
 }
 
-func MakePhoto(photoPath string) error {
-	logVK.Println(vkUPD.CFG.MyID)
+func MakePhotoAlbum(photoPath string, AlbumID int) error {
+
+	url, err := vkUPD.API.PhotosGetUploadServer(api.Params{
+		"album_id": AlbumID,
+	})
+	if err != nil {
+		return err
+	}
+	logVK.Printf("Get URL: %s\n", url.UploadURL)
+
+	rUrl, err := PostUpload(url.UploadURL, photoPath, "file1")
+	if err != nil {
+		return err
+	}
+	logVK.Printf("Request.server after POST: %d\n", rUrl.Server)
+
+	rSave, err := vkUPD.API.PhotosSave(api.Params{
+		"album_id":    AlbumID,
+		"server":      rUrl.Server,
+		"photos_list": rUrl.PhotoList,
+		"hash":        rUrl.Hash,
+		"latitude":    "90",
+		"longitude":   "180",
+		"caption":     "STONER",
+	})
+	if err != nil {
+		return err
+	}
+	if err = vkUPD.DB.Photos.Insert(database.Photo{PhotoID: rSave[0].ID}); err != nil {
+		return err
+	}
+	logVK.Printf("Photo ID after save: %d. Uploud to album(%d) succses\n", rSave[0].ID, AlbumID)
+
+	time.Sleep(201 * time.Millisecond)
+
+	return nil
+}
+
+func MakePhotoWall(photoPath string) error {
+
 	url, err := vkUPD.API.PhotosGetWallUploadServer(api.Params{
 		"group_id": vkUPD.CFG.MyID,
 	})
@@ -83,7 +122,7 @@ func MakePhoto(photoPath string) error {
 	}
 	logVK.Printf("Get URL: %s\n", url.UploadURL)
 
-	rUrl, err := PostUpload(url.UploadURL, photoPath)
+	rUrl, err := PostUpload(url.UploadURL, photoPath, "photo")
 	if err != nil {
 		return err
 	}
@@ -115,6 +154,27 @@ func MakePhoto(photoPath string) error {
 		return err
 	}
 	logVK.Printf("Make succses, postID: %d", rPost.PostID)
+
+	time.Sleep(500 * time.Millisecond)
+
+	return nil
+}
+
+func EditPost(PhotoID int) error {
+	rPost, err := vkUPD.API.WallEdit(api.Params{
+		"owner_id":           vkUPD.CFG.MyID,
+		"post_id":            vkUPD.CFG.MainPostID,
+		"friends_only":       0,
+		"attachments":        "photo" + strconv.Itoa(vkUPD.CFG.MyID) + "_" + strconv.Itoa(PhotoID),
+		"mute_notifications": 1,
+		"copyright":          "https://kinggizzardandthelizardwizard.com/releases",
+		"message":            time.Now().Format("Mon Jan 2 15:04:05"),
+	})
+	if err != nil {
+		return err
+	}
+
+	logVK.Printf("Edit succses, postID: %d", rPost.PostID)
 
 	time.Sleep(500 * time.Millisecond)
 

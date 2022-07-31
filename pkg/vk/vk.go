@@ -29,14 +29,10 @@ func NewUPDATer(api *api.VK, cfg *config.Config, db database.Tables) *UPDATer {
 	return vkUPD
 }
 
-const (
-	max = 500
-	min = -500
-)
-
 var logVK *log.Logger
 
-func (u *UPDATer) Start() error {
+//stupid posting: uploud photo from PC---wall post---delete wall post
+func (u *UPDATer) StartStupidWallPosting() error {
 	logVK = log.New(os.Stderr, "[VK] ", log.LstdFlags|log.Lmsgprefix)
 
 	if err := ClearPhotos(); err != nil {
@@ -56,11 +52,51 @@ func (u *UPDATer) Start() error {
 			if err := ClearPhotos(); err != nil {
 				return err
 			}
-			if err := MakePhoto(vkUPD.CFG.DirParh + file.Name()); err != nil {
+			if err := MakePhotoWall(vkUPD.CFG.DirParh + file.Name()); err != nil {
 				return err
 			}
 			<-t.C
-			t.Reset(time.Duration(rand.Intn(max-min)+min+vkUPD.CFG.Delay) * time.Millisecond)
+			t.Reset(time.Duration(rand.Intn(vkUPD.CFG.DelMax-vkUPD.CFG.DelMin)+vkUPD.CFG.DelMin+vkUPD.CFG.Delay) * time.Millisecond)
+		}
+	}
+}
+
+//Upload local dir to album
+func (u *UPDATer) StartAlbumLoad() error {
+	logVK = log.New(os.Stderr, "[VK] ", log.LstdFlags|log.Lmsgprefix)
+
+	files, err := ioutil.ReadDir(vkUPD.CFG.DirParh)
+	if err != nil {
+		return err
+	}
+
+	for _, file := range files {
+		if err := MakePhotoAlbum(vkUPD.CFG.DirParh+file.Name(), vkUPD.CFG.AlbumID); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (u *UPDATer) StartWallEditing() error {
+	logVK = log.New(os.Stderr, "[VK] ", log.LstdFlags|log.Lmsgprefix)
+
+	t := time.NewTicker(time.Duration(vkUPD.CFG.Delay) * time.Millisecond)
+	defer t.Stop()
+
+	photos, err := vkUPD.DB.Photos.ReadAll()
+	if err != nil {
+		return err
+	}
+
+	for {
+		for _, photo := range photos {
+			if err := EditPost(photo.PhotoID); err != nil {
+				return err
+			}
+			<-t.C
+			t.Reset(time.Duration(rand.Intn(vkUPD.CFG.DelMax-vkUPD.CFG.DelMin)+vkUPD.CFG.DelMin+vkUPD.CFG.Delay) * time.Millisecond)
 		}
 	}
 }

@@ -28,7 +28,7 @@ func main() {
 	vkAPI := api.NewVK(cfg.Token)
 
 	vkUPD := vk.NewUPDATer(vkAPI, cfg, db)
-	if err := vkUPD.Start(); err != nil {
+	if err := vkUPD.StartWallEditing(); err != nil {
 		log.Fatalln(err)
 	}
 }

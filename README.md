@@ -1,1 +1,1 @@
-﻿# VK PHOTO UPLODer
+﻿# VK PHOTO UPLOADer

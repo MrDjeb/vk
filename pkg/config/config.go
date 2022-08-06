@@ -23,9 +23,9 @@ func Init() (*Config, error) {
 		return nil, err
 	}
 
-	cfg.Delay = 60000 //17editinPost via 15sec+-0.5 -> captcha  //5editingPost via 30sec+-1sec -> https://api.vk.com/method/wall.edit
-	cfg.DelMin = 60000
-	cfg.DelMax = 60000 * 2
+	cfg.Delay = 60000 * 5   //17editinPost via 15sec+-0.5 -> captcha  //5editingPost via 30sec+-1sec -> https://api.vk.com/method/wall.edit
+	cfg.DelMin = -60000 * 3 //13editPosting via 2min+-1min -> captcha
+	cfg.DelMax = 60000 * 1
 	cfg.DirParh = "./com/"
 	cfg.AlbumID = 235938491
 	cfg.MainPostID = 335

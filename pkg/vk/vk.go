@@ -1,7 +1,6 @@
 package vk
 
 import (
-	"io/ioutil"
 	"log"
 	"math/rand"
 	"os"
@@ -31,7 +30,7 @@ func NewUPDATer(api *api.VK, cfg *config.Config, db database.Tables) *UPDATer {
 
 var logVK *log.Logger
 
-//stupid posting: uploud photo from PC---wall post---delete wall post
+// stupid posting: uploud photo from PC---wall post---delete wall post
 func (u *UPDATer) StartStupidWallPosting() error {
 	logVK = log.New(os.Stderr, "[VK] ", log.LstdFlags|log.Lmsgprefix)
 
@@ -42,7 +41,7 @@ func (u *UPDATer) StartStupidWallPosting() error {
 	t := time.NewTicker(time.Duration(vkUPD.CFG.Delay) * time.Millisecond)
 	defer t.Stop()
 
-	files, err := ioutil.ReadDir(vkUPD.CFG.DirParh)
+	files, err := os.ReadDir(vkUPD.CFG.DirParh)
 	if err != nil {
 		return err
 	}
@@ -61,11 +60,11 @@ func (u *UPDATer) StartStupidWallPosting() error {
 	}
 }
 
-//Upload local dir to album
+// Upload local dir to album
 func (u *UPDATer) StartAlbumLoad() error {
 	logVK = log.New(os.Stderr, "[VK] ", log.LstdFlags|log.Lmsgprefix)
 
-	files, err := ioutil.ReadDir(vkUPD.CFG.DirParh)
+	files, err := os.ReadDir(vkUPD.CFG.DirParh)
 	if err != nil {
 		return err
 	}
@@ -89,6 +88,7 @@ func (u *UPDATer) StartWallEditing() error {
 	if err != nil {
 		return err
 	}
+	logVK.Println(photos)
 
 	for {
 		for _, photo := range photos {

@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
-	"io/ioutil"
+
 	"mime/multipart"
 	"net/http"
 	"os"
@@ -62,7 +62,7 @@ func PostUpload(urlPath, photoPath, field string) (*ResponseURL, error) {
 		logVK.Printf("PostUpload failed with response code: %d\n", res.StatusCode)
 	}
 
-	Rbody, err := ioutil.ReadAll(res.Body)
+	Rbody, err := io.ReadAll(res.Body)
 	if err != nil {
 		return nil, err
 	}

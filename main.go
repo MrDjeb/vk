@@ -2,8 +2,6 @@ package main
 
 import (
 	"log"
-	"os"
-	"time"
 
 	"github.com/MrDjeb/vk/pkg/config"
 	"github.com/MrDjeb/vk/pkg/database"
@@ -16,12 +14,12 @@ func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile | log.Lmsgprefix)
 	log.SetPrefix("[ERROR] ")
 
-	if tz := os.Getenv("TZ"); tz != "" {
+	/*if tz := os.Getenv("TZ"); tz != "" {
 		if _, err := time.LoadLocation(tz); err != nil {
 			log.Fatalln(err)
 		}
 		log.Printf("Succses load time zone from docker image env: %s", tz)
-	}
+	}*/
 
 	cfg, err := config.Init()
 	if err != nil {

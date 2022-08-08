@@ -23,10 +23,12 @@ jobs:
           install: true
 
       - name: Build container image
-        run: docker build --platform linux/arm64/v8 -t $(echo $REGISTRY)/$(echo $IMAGE_NAME):$(echo $GITHUB_SHA | head -c7) .
+        run: docker build --platform linux/arm64/v8 -t $(echo $IMAGE_NAME):$(echo $GITHUB_SHA | head -c7) .
 
       - name: Log in to Docker Hub Container Registry
         run: echo ${{ secrets.DOCKER_HUB_PASS }} | docker login --username $(echo $REGISTRY) --password-stdin
 
       - name: Push image to Docker Hub Container Registry
-        run: docker push $(echo $REGISTRY)/$(echo $IMAGE_NAME):$(echo $GITHUB_SHA | head -c7)
+        run: |
+          docker tag $(echo $IMAGE_NAME):$(echo $GITHUB_SHA | head -c7) $(echo $REGISTRY)/$(echo $IMAGE_NAME):$(echo $GITHUB_SHA | head -c7)
+          docker push $(echo $REGISTRY)/$(echo $IMAGE_NAME):$(echo $GITHUB_SHA | head -c7)

@@ -2,6 +2,8 @@ package main
 
 import (
 	"log"
+	"os"
+	"time"
 
 	"github.com/MrDjeb/vk/pkg/config"
 	"github.com/MrDjeb/vk/pkg/database"
@@ -13,6 +15,12 @@ import (
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile | log.Lmsgprefix)
 	log.SetPrefix("[ERROR] ")
+
+	if tz := os.Getenv("TZ"); tz != "" {
+		if _, err := time.LoadLocation(tz); err != nil {
+			log.Fatalln(err)
+		}
+	}
 
 	cfg, err := config.Init()
 	if err != nil {

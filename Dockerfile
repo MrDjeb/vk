@@ -19,6 +19,7 @@ WORKDIR /docker-vk/
 COPY --from=0 /github.com/MrDjeb/vk/.bin .
 #COPY --from=0 /github.com/MrDjeb/vk/configs configs/
 
+ENV TZ="Europe/Moscow"
 EXPOSE 80
 
 ENTRYPOINT ["./.bin"]

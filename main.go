@@ -20,6 +20,7 @@ func main() {
 		if _, err := time.LoadLocation(tz); err != nil {
 			log.Fatalln(err)
 		}
+		log.Printf("Succses load time zone from docker image env: %s", tz)
 	}
 
 	cfg, err := config.Init()

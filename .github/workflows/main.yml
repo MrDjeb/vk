@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  REGISTRY: "mrdjeb"
+  IMAGE_NAME: "vk"
+
+jobs:
+  build_and_push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout master
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+      - run: git checkout HEAD
+
+      - name: Build container image
+        run: docker build --platform linux/arm64/v8 -t $(echo $REGISTRY)/$(echo $IMAGE_NAME):$(echo $GITHUB_SHA | head -c7) .
+
+      - name: Log in to Docker Hub Container Registry
+        run: echo ${{ secrets.DOCKER_HUB_PASS }} | docker login --username $(echo $REGISTRY) --password-stdin
+
+      - name: Push image to Yandex Cloud Container Registry
+        run: docker push $(echo $REGISTRY)/$(echo $IMAGE_NAME):$(echo $GITHUB_SHA | head -c7)

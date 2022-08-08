@@ -34,5 +34,5 @@ jobs:
         with:
           context: .
           push: true
-          tags: $(echo $REGISTRY)/$(echo $IMAGE_NAME):latest
+          tags: $(echo $REGISTRY)/$(echo $IMAGE_NAME)
           platforms: linux/arm64/v8

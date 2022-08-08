@@ -34,5 +34,8 @@ jobs:
         with:
           context: .
           push: true
-          tags: $(echo $REGISTRY)/$(echo $IMAGE_NAME)
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest, ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$(echo $GITHUB_SHA | head -c7)
           platforms: linux/arm64/v8
+          build-args: |
+              IMAGE_NAME=${{ env.IMAGE_NAME }}
+              REGISTRY=${{ env.REGISTRY }}

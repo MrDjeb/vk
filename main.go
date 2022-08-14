@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os"
 	"time"
 
 	"github.com/MrDjeb/vk/pkg/config"
@@ -15,10 +16,12 @@ func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile | log.Lmsgprefix)
 	log.SetPrefix("[ERROR] ")
 
-	var err error
-	time.Local, err = time.LoadLocation("Europe/Moscow")
-	if err != nil {
-		log.Printf("error loading location \"Europe/Moscow\": %v\n", err)
+	if tz := os.Getenv("TZ"); tz != "" {
+		var err error
+		time.Local, err = time.LoadLocation(tz)
+		if err != nil {
+			log.Printf("error loading location '%s': %v\n", tz, err)
+		}
 	}
 
 	cfg, err := config.Init()

@@ -12,13 +12,12 @@ RUN apk add build-base
 #RUN go mod download 
 RUN GOOS=linux GOARCH=arm64 go build -o ./.bin main.go
 
-#FROM alpine:latest
-FROM scratch as final
+FROM alpine:latest
 
 WORKDIR /docker-vk/
 
-COPY --from=0 /github.com/MrDjeb/vk/.bin .
-COPY --from=0 /usr/local/go/lib/time/zoneinfo.zip /
+COPY --from=builder /github.com/MrDjeb/vk/.bin .
+COPY --from=builder /usr/local/go/lib/time/zoneinfo.zip /
 #COPY --from=0 /github.com/MrDjeb/vk/configs configs/
 
 ENV TZ="Europe/Moscow"

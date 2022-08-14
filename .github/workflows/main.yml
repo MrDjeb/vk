@@ -9,6 +9,7 @@ env:
   REGISTRY: "mrdjeb"
   IMAGE_NAME: "vk"
   CONTAINER_NAME: "UPLOADer"
+  GITHUB_SHA_SHORT: $(echo $GITHUB_SHA | head -c 8)
 
 
 jobs:
@@ -30,8 +31,8 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Set env
-        run: echo "GITHUB_SHA_SHORT=$(echo $GITHUB_SHA | head -c 8)" >> $GITHUB_ENV
+      #- name: Set env
+      # run: echo "GITHUB_SHA_SHORT=$(echo $GITHUB_SHA | head -c 8)" >> $GITHUB_ENV
 
       - name: Build and push
         uses: docker/build-push-action@v3
@@ -75,9 +76,9 @@ jobs:
             echo ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.GITHUB_SHA_SHORT }}
 
             # Pull image DockerHub
-            docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.GITHUB_SHA_SHORT }}
+            docker pull $REGISTRY/$IMAGE_NAME:$GITHUB_SHA_SHORT
 
             # Run a new container from a new image
-            docker run -e TOKEN -e MY_ID -d -v UPLOADer-db:/docker-vk/sqlite \
+            docker run -e TOKEN -e MY_ID -d -v $CONTAINER_NAME-db:/docker-vk/sqlite \
             --restart always --publish 80:80 --name $CONTAINER_NAME \
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.GITHUB_SHA_SHORT }}
+            $REGISTRY/$IMAGE_NAME:$GITHUB_SHA_SHORT

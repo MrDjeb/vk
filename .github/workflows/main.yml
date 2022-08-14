@@ -11,44 +11,10 @@ env:
   CONTAINER_NAME: "UPLOADer"
 
 
-jobs:
-  build_and_push:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
-      
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-      
-      - name: Login to DockerHub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Set env
-        run: echo "GITHUB_SHA_SHORT=$(echo $GITHUB_SHA | head -c 8)" >> $GITHUB_ENV
-
-      - name: Build and push
-        uses: docker/build-push-action@v3
-        with:
-          context: .
-          push: true
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.GITHUB_SHA_SHORT }}, ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
-          platforms: linux/arm64/v8
-          build-args: |
-              IMAGE_NAME=${{ env.IMAGE_NAME }}
-              REGISTRY=${{ env.REGISTRY }}
-              GITHUB_SHA_SHORT=${{ env.GITHUB_SHA_SHORT }}
-
-              
+jobs:   
   deploy:
     runs-on: ubuntu-latest
-    needs: build_and_push
+
 
     steps:
       - name: Set params
@@ -63,7 +29,7 @@ jobs:
       - name: Deploy to DockerHub via SSH action
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ steps.vars.outputs.ngrok_host }}
+          host: tcp://0.tcp.eu.ngrok.io
           port: ${{ steps.vars.outputs.ngrok_port }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSHKEY }}

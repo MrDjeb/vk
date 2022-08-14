@@ -51,14 +51,20 @@ jobs:
     needs: build_and_push
 
     steps:
-      - name: Set env
-        run: echo "GITHUB_SHA_SHORT=$(echo $GITHUB_SHA | head -c 8)" >> $GITHUB_ENV
-        
+      - name: Set params
+        id: vars
+        run: |
+          echo "GITHUB_SHA_SHORT=$(echo $GITHUB_SHA | head -c 8)" >> $GITHUB_ENV
+          echo ::set-output name=ngrok_host::$(curl -H "Authorization: Bearer ${{ secrets.NGROK_TOKEN }}" -H "Ngrok-Version: 2" \
+          https://api.ngrok.com/tunnels | jq '.tunnels[] | select(.proto == "tcp") | .public_url' | sed 's/"//g' | cut -d: -f1,2)
+          echo ::set-output name=ngrok_port::$(curl -H "Authorization: Bearer ${{ secrets.NGROK_TOKEN }}" -H "Ngrok-Version: 2" \
+          https://api.ngrok.com/tunnels | jq '.tunnels[] | select(.proto == "tcp") | .public_url' | sed 's/"//g' | cut -d: -f3)
+
       - name: Deploy to DockerHub via SSH action
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.HOST }}
-          port: ${{ secrets.PORT }}
+          host: ${{ steps.vars.outputs.ngrok_host }}
+          port: ${{ steps.vars.outputs.ngrok_port }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSHKEY }}
           envs: REGISTRY, IMAGE_NAME, CONTAINER_NAME, GITHUB_SHA_SHORT, 
@@ -74,8 +80,6 @@ jobs:
             docker ps -q --filter "name=$CONTAINER_NAME" | grep -q . && \
             docker stop $CONTAINER_NAME && \
             docker rm -f $CONTAINER_NAME
-            echo $REGISTRY/$IMAGE_NAME:$GITHUB_SHA_SHORT
-            echo ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.GITHUB_SHA_SHORT }}
 
             # Pull image DockerHub
             docker pull $REGISTRY/$IMAGE_NAME:$GITHUB_SHA_SHORT

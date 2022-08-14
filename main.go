@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"time"
 
 	"github.com/MrDjeb/vk/pkg/config"
 	"github.com/MrDjeb/vk/pkg/database"
@@ -14,12 +15,11 @@ func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile | log.Lmsgprefix)
 	log.SetPrefix("[ERROR] ")
 
-	/*if tz := os.Getenv("TZ"); tz != "" {
-		if _, err := time.LoadLocation(tz); err != nil {
-			log.Fatalln(err)
-		}
-		log.Printf("Succses load time zone from docker image env: %s", tz)
-	}*/
+	var err error
+	time.Local, err = time.LoadLocation("Europe/Moscow")
+	if err != nil {
+		log.Printf("error loading location \"Europe/Moscow\": %v\n", err)
+	}
 
 	cfg, err := config.Init()
 	if err != nil {

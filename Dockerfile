@@ -17,8 +17,8 @@ FROM scratch as final
 
 WORKDIR /docker-vk/
 
-COPY --from=builder /github.com/MrDjeb/vk/.bin .
-COPY --from=builder /usr/local/go/lib/time/zoneinfo.zip /
+COPY --from=0 /github.com/MrDjeb/vk/.bin .
+COPY --from=0 /usr/local/go/lib/time/zoneinfo.zip /
 #COPY --from=0 /github.com/MrDjeb/vk/configs configs/
 
 ENV TZ="Europe/Moscow"

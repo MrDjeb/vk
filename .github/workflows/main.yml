@@ -29,7 +29,7 @@ jobs:
       - name: Deploy to DockerHub via SSH action
         uses: appleboy/ssh-action@master
         with:
-          host: tcp://0.tcp.eu.ngrok.io
+          host: 0.tcp.eu.ngrok.io
           port: ${{ steps.vars.outputs.ngrok_port }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSHKEY }}

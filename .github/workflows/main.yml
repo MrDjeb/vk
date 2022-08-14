@@ -9,7 +9,6 @@ env:
   REGISTRY: "mrdjeb"
   IMAGE_NAME: "vk"
   CONTAINER_NAME: "UPLOADer"
-  GITHUB_SHA_SHORT: $(echo $GITHUB_SHA | head -c 8)
 
 
 jobs:
@@ -31,8 +30,8 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      #- name: Set env
-      # run: echo "GITHUB_SHA_SHORT=$(echo $GITHUB_SHA | head -c 8)" >> $GITHUB_ENV
+      - name: Set env
+        run: echo "GITHUB_SHA_SHORT=$(echo $GITHUB_SHA | head -c 8)" >> $GITHUB_ENV
 
       - name: Build and push
         uses: docker/build-push-action@v3
@@ -52,6 +51,9 @@ jobs:
     needs: build_and_push
 
     steps:
+      - name: Set env
+        run: echo "GITHUB_SHA_SHORT=$(echo $GITHUB_SHA | head -c 8)" >> $GITHUB_ENV
+        
       - name: Deploy to DockerHub via SSH action
         uses: appleboy/ssh-action@master
         with:

@@ -9,6 +9,7 @@ import (
 	"github.com/MrDjeb/vk/pkg/config"
 	"github.com/MrDjeb/vk/pkg/database"
 	"github.com/SevereCloud/vksdk/api"
+	"github.com/SevereCloud/vksdk/api/errors"
 )
 
 var vkUPD *UPDATer
@@ -88,11 +89,27 @@ func (u *UPDATer) StartWallEditing() error {
 	if err != nil {
 		return err
 	}
-	logVK.Println(photos)
 
 	for {
 		for _, photo := range photos {
-			if err := EditPost(photo.PhotoID); err != nil {
+			if err := EditPost(photo.PhotoID, u.CFG.MainPostID); err != nil {
+				switch errors.GetType(err) {
+				case errors.Access:
+					postID, err := MakePost(photo.PhotoID)
+					if err != nil {
+						return err
+					}
+					if err := PinPost(postID); err != nil {
+						return err
+					}
+					u.CFG.MainPostID = postID
+				case errors.Captcha:
+					log.Print("Требуется ввод кода с картинки (Captcha) EditPost")
+				default:
+					return err
+				}
+			}
+			if err := SetOnline(); err != nil {
 				return err
 			}
 			<-t.C

@@ -28,7 +28,7 @@ func Init() (*Config, error) {
 	cfg.DelMax = 60000 * 1
 	cfg.DirParh = "./com/"
 	cfg.AlbumID = 235938491
-	cfg.MainPostID = 337
+	cfg.MainPostID = 88
 
 	return &cfg, nil
 }

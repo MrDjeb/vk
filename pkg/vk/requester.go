@@ -3,6 +3,7 @@ package vk
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -152,17 +153,54 @@ func MakePhotoWall(photoPath string) error {
 	if err = vkUPD.DB.Photos.Insert(database.Photo{PhotoID: rSave[0].ID}); err != nil {
 		return err
 	}
-	logVK.Printf("Make succses, postID: %d", rPost.PostID)
+	logVK.Printf("MakePhotoWall succses, postID: %d", rPost.PostID)
 
 	time.Sleep(500 * time.Millisecond)
 
 	return nil
 }
 
-func EditPost(PhotoID int) error {
+func MakePost(PhotoID int) (int, error) {
+	res, err := vkUPD.API.WallPost(api.Params{
+		"owner_id":           vkUPD.CFG.MyID,
+		"friends_only":       0,
+		"attachments":        "photo" + strconv.Itoa(vkUPD.CFG.MyID) + "_" + strconv.Itoa(PhotoID),
+		"mute_notifications": 1,
+		"copyright":          "https://kinggizzardandthelizardwizard.com/releases",
+		"message":            time.Now().Format("Mon Jan 2 15:04:05"),
+	})
+	if err != nil {
+		return 0, err
+	}
+	logVK.Printf("MakePost succses, postID: %d", res.PostID)
+
+	time.Sleep(500 * time.Millisecond)
+
+	return res.PostID, nil
+}
+
+func PinPost(PostID int) error {
+	res, err := vkUPD.API.WallPin(api.Params{
+		"owner_id": vkUPD.CFG.MyID,
+		"post_id":  PostID,
+	})
+	if err != nil {
+		return err
+	}
+	if res != 1 {
+		return errors.New("wallPin return response different from 1, can't WallPin")
+	}
+	logVK.Printf("PinPost succses, postID: %d", PostID)
+
+	time.Sleep(500 * time.Millisecond)
+
+	return nil
+}
+
+func EditPost(PhotoID, PostID int) error {
 	rPost, err := vkUPD.API.WallEdit(api.Params{
 		"owner_id":           vkUPD.CFG.MyID,
-		"post_id":            vkUPD.CFG.MainPostID,
+		"post_id":            PostID,
 		"friends_only":       0,
 		"attachments":        "photo" + strconv.Itoa(vkUPD.CFG.MyID) + "_" + strconv.Itoa(PhotoID),
 		"mute_notifications": 1,
@@ -208,5 +246,22 @@ func ClearPhotos() error {
 			return err
 		}
 	}
+	return nil
+}
+
+func SetOnline() error {
+	res, err := vkUPD.API.AccountSetOnline(api.Params{
+		"voip": 0,
+	})
+	if err != nil {
+		return err
+	}
+	if res != 1 {
+		return errors.New("setOnline return response different from 1, can't setOnline")
+	}
+	logVK.Println("SetOnline succses")
+
+	time.Sleep(500 * time.Millisecond)
+
 	return nil
 }

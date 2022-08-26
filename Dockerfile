@@ -9,8 +9,9 @@ COPY . /github.com/MrDjeb/vk/
 WORKDIR /github.com/MrDjeb/vk/
 
 RUN apk add build-base
-#RUN go mod download 
-RUN GOOS=linux GOARCH=arm64 go build -o ./.bin main.go
+#RUN go mod download go clean
+RUN go clean
+RUN GOOS=linux GOARCH=arm64 go build -x -o ./.bin main.go
 
 FROM alpine:latest
 
